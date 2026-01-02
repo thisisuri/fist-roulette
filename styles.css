@@ -228,7 +228,6 @@ header {
     justify-content: center;
     overflow: hidden;
 }
-}
 
 .slideshow-viewer {
     position: relative;
@@ -595,10 +594,13 @@ header {
 }
 
 .challenge-lang .flag {
-    font-size: 2rem;
+    width: 32px;
+    height: 24px;
     flex-shrink: 0;
-    width: 40px;
-    text-align: center;
+    border-radius: 4px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .challenge-lang .challenge-text {
@@ -788,7 +790,8 @@ footer {
     }
 
     .challenge-lang .flag {
-        font-size: 1.5rem;
+        width: 28px;
+        height: 21px;
     }
 
     .challenge-lang .challenge-text {

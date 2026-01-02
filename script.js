@@ -183,10 +183,6 @@ class FutureRoulette {
     return validChallenges[Math.floor(Math.random() * validChallenges.length)];
   }
 
-  calculateTargetIndex(targetChallenge) {
-    return this.challenges.findIndex((c) => c.id === targetChallenge.id);
-  }
-
   async spin() {
     if (this.isSpinning) return;
 
@@ -211,7 +207,7 @@ class FutureRoulette {
     // Finalizar
     this.completeSpin(selectedChallenge);
 
-    console.log(`🎲 Selected challenge: ${selectedChallenge.text}`);
+    console.log(`🎲 Selected challenge: ${selectedChallenge.texts.es}`);
   }
 
   showSpinner() {
@@ -231,9 +227,6 @@ class FutureRoulette {
     `;
 
     this.elements.spinnerArea.appendChild(spinnerOverlay);
-
-    // Efectos de sonido
-    this.playSpinSounds();
   }
 
   async waitForSpinner() {
@@ -259,82 +252,6 @@ class FutureRoulette {
       </div>
     `;
   }
-
-  centerOnWinningSlot(winningId) {
-    const wheel = document.getElementById("rouletteWheel");
-    const container = this.elements.wheelTrack;
-    const slots = wheel.querySelectorAll(".roulette-slot");
-
-    // Encontrar la casilla con el número ganador en la segunda copia (posición inicial)
-    const totalSlots = this.challenges.length;
-    let targetSlot = null;
-
-    slots.forEach((slot, index) => {
-      const slotNumber = parseInt(
-        slot.querySelector(".slot-number").textContent
-      );
-      const isInSecondCopy = index >= totalSlots && index < totalSlots * 2;
-
-      if (slotNumber === winningId && isInSecondCopy) {
-        targetSlot = slot;
-      }
-    });
-
-    if (targetSlot && container) {
-      const containerWidth = container.offsetWidth;
-      const slotWidth = 120;
-      const centerOffset = containerWidth / 2 - slotWidth / 2;
-      const slotIndex = Array.from(slots).indexOf(targetSlot);
-      const targetPosition = slotIndex * slotWidth;
-
-      wheel.style.transition =
-        "transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
-      wheel.style.transform = `translateX(${centerOffset - targetPosition}px)`;
-    }
-  }
-
-  async animateWheel(targetIndex) {
-    return new Promise((resolve) => {
-      const wheel = document.getElementById("rouletteWheel");
-      const container = this.elements.wheelTrack;
-      const slotWidth = 120;
-      const totalSlots = this.challenges.length;
-      const containerWidth = container.offsetWidth;
-      const centerOffset = containerWidth / 2 - slotWidth / 2;
-
-      // Calcular rotaciones adicionales para efecto visual
-      const extraRotations = 4 + Math.random() * 3; // 4-7 vueltas completas
-      const extraDistance = extraRotations * totalSlots * slotWidth;
-
-      // Posición final: segunda copia + índice objetivo, centrado
-      const finalPosition = totalSlots * slotWidth + targetIndex * slotWidth;
-      const centeredFinalPosition = centerOffset - finalPosition;
-
-      // Posición durante la animación (con vueltas extra)
-      const animationEndPosition =
-        centerOffset - (finalPosition + extraDistance);
-
-      // Primera fase: animación larga con vueltas extra
-      wheel.style.transition = "transform 3.5s cubic-bezier(0.15, 0, 0.25, 1)";
-      wheel.style.transform = `translateX(${animationEndPosition}px)`;
-
-      // Sonidos durante la rotación
-      this.playSpinSounds();
-
-      setTimeout(() => {
-        // Segunda fase: posicionar en la casilla final centrada
-        wheel.style.transition =
-          "transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
-        wheel.style.transform = `translateX(${centeredFinalPosition}px)`;
-
-        setTimeout(() => {
-          resolve();
-        }, 800);
-      }, 3500);
-    });
-  }
-
-
 
   completeSpin(challenge) {
     // Actualizar texto del desafío en los 3 idiomas
@@ -373,26 +290,6 @@ class FutureRoulette {
     );
   }
 
-  highlightWinningSlot(winningId) {
-    // Limpiar highlight anterior
-    document.querySelectorAll(".roulette-slot").forEach((slot) => {
-      slot.classList.remove("winning-slot");
-    });
-
-    // Encontrar y marcar la casilla ganadora que está centrada
-    const wheel = document.getElementById("rouletteWheel");
-    const container = this.elements.wheelTrack;
-    const containerWidth = container.offsetWidth;
-    const centerX = containerWidth / 2;
-    const slots = wheel.querySelectorAll(".roulette-slot");
-
-    let closestSlot = null;
-    let minDistance = Infinity;
-
-    slots.forEach((slot) => {
-      const slotNumber = parseInt(
-        slot.querySelector(".slot-number").textContent
-      );
   createParticles() {
     const particleCount = 20;
 
@@ -466,19 +363,19 @@ class FutureRoulette {
       const style = document.createElement("style");
       style.id = "burst-animation-style";
       style.textContent = `
-                @keyframes burstParticle {
-                    0% {
-                        transform: translate(-50%, -50%) translate(0, 0);
-                        opacity: 1;
-                        scale: 1;
-                    }
-                    100% {
-                        transform: translate(-50%, -50%) translate(var(--vx), var(--vy));
-                        opacity: 0;
-                        scale: 0;
-                    }
-                }
-            `;
+        @keyframes burstParticle {
+          0% {
+            transform: translate(-50%, -50%) translate(0, 0);
+            opacity: 1;
+            scale: 1;
+          }
+          100% {
+            transform: translate(-50%, -50%) translate(var(--vx), var(--vy));
+            opacity: 0;
+            scale: 0;
+          }
+        }
+      `;
       document.head.appendChild(style);
     }
   }
@@ -486,46 +383,45 @@ class FutureRoulette {
   // Método para reiniciar el juego
   reset() {
     this.recentChallenges = [];
-    this.elements.challengeText.textContent =
-      "¡Haz girar la ruleta para comenzar!";
-    this.elements.spinButton.querySelector(".button-text").textContent =
-      "INICIAR RULETA";
-
-    // Resetear ruleta a la posición inicial centrada
-    this.centerWheel();
+    this.saveRecentChallenges();
+    
+    // Resetear a mensajes iniciales
+    this.elements.challengeEs.textContent = "empieza a jugar";
+    this.elements.challengeRu.textContent = "начни играть";
+    this.elements.challengeEn.textContent = "start playing";
+    
+    this.elements.spinButton.querySelector(".button-text").textContent = "GIRAR RULETA";
+    this.elements.spinButton.disabled = false;
+    this.isSpinning = false;
+    
+    // Restaurar área de spinner
+    this.elements.spinnerArea.innerHTML = `
+      <h2 class="roulette-title">RULETA DE DESAFÍOS</h2>
+      <div class="default-message">empieza a jugar</div>
+    `;
 
     console.log("🔄 Game reset");
   }
 
   // Método para mostrar estado de error
   showErrorState(message) {
-    // Ocultar el slideshow y mostrar mensaje de error
-    const slideshowContainer = document.querySelector(".slideshow-container");
-    if (slideshowContainer) {
-      slideshowContainer.style.display = "none";
-    }
-
     // Deshabilitar botón de giro
     this.elements.spinButton.disabled = true;
-    this.elements.spinButton.querySelector(".button-text").textContent =
-      "ERROR";
+    this.elements.spinButton.querySelector(".button-text").textContent = "ERROR";
 
-    // Mostrar mensaje de error en el panel de resultado
-    this.elements.challengeText.textContent = message;
+    // Mostrar mensaje de error en los 3 idiomas
+    this.elements.challengeEs.textContent = message;
+    this.elements.challengeRu.textContent = "Ошибка загрузки";
+    this.elements.challengeEn.textContent = "Loading error";
 
-    // Crear mensaje de error en el área del slideshow
-    const rouletteContainer = document.querySelector(".roulette-container");
-    const errorDiv = document.createElement("div");
-    errorDiv.className = "error-state";
-    errorDiv.innerHTML = `
-      <div class="error-icon">⚠️</div>
-      <div class="error-message">${message}</div>
-      <div class="error-suggestion">Por favor, recarga la página.</div>
+    // Crear mensaje de error en el área del spinner
+    this.elements.spinnerArea.innerHTML = `
+      <div class="error-state">
+        <div class="error-icon">⚠️</div>
+        <div class="error-message">${message}</div>
+        <div class="error-suggestion">Por favor, recarga la página.</div>
+      </div>
     `;
-
-    // Insertar el error antes del panel de control
-    const controlPanel = document.querySelector(".control-panel");
-    rouletteContainer.insertBefore(errorDiv, controlPanel);
 
     console.log(`💥 Error state displayed: ${message}`);
   }
