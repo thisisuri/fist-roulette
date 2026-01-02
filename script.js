@@ -10,9 +10,15 @@ class FutureRoulette {
     this.elements = {
       spinnerArea: document.getElementById("spinnerArea"),
       spinButton: document.getElementById("spinButton"),
-      challengeEs: document.getElementById("challengeEs").querySelector(".challenge-text"),
-      challengeRu: document.getElementById("challengeRu").querySelector(".challenge-text"),
-      challengeEn: document.getElementById("challengeEn").querySelector(".challenge-text"),
+      challengeEs: document
+        .getElementById("challengeEs")
+        .querySelector(".challenge-text"),
+      challengeRu: document
+        .getElementById("challengeRu")
+        .querySelector(".challenge-text"),
+      challengeEn: document
+        .getElementById("challengeEn")
+        .querySelector(".challenge-text"),
       particles: document.getElementById("particles"),
     };
 
@@ -22,10 +28,10 @@ class FutureRoulette {
   validateDOM() {
     const requiredElements = [
       "spinnerArea",
-      "spinButton", 
+      "spinButton",
       "challengeMultilang",
       "challengeEs",
-      "challengeRu", 
+      "challengeRu",
       "challengeEn",
       "particles",
     ];
@@ -47,13 +53,13 @@ class FutureRoulette {
       await this.loadChallenges();
       this.setupEventListeners();
       this.createParticles();
-      
+
       // Cargar historial desde localStorage
       this.loadRecentChallenges();
-      
+
       // Solo mostrar "empieza a jugar" si nunca se ha jugado
       if (this.recentChallenges.length === 0) {
-        this.elements.challengeEs.textContent = "empieza a jugar";
+        this.elements.challengeEs.textContent = "start playing";
         this.elements.challengeRu.textContent = "начни играть";
         this.elements.challengeEn.textContent = "start playing";
       } else {
@@ -63,7 +69,7 @@ class FutureRoulette {
         this.elements.challengeRu.textContent = lastChallenge.texts.ru;
         this.elements.challengeEn.textContent = lastChallenge.texts.en;
       }
-      
+
       console.log("🎮 Fist Roulette 2026 initialized successfully!");
     } catch (error) {
       console.error("❌ Error initializing roulette:", error);
@@ -73,22 +79,33 @@ class FutureRoulette {
 
   loadRecentChallenges() {
     try {
-      const stored = localStorage.getItem('fistroulette_recent');
+      const stored = localStorage.getItem("fistroulette_recent");
       if (stored) {
         this.recentChallenges = JSON.parse(stored);
-        console.log(`📚 Loaded ${this.recentChallenges.length} recent challenges from storage`);
+        console.log(
+          `📚 Loaded ${this.recentChallenges.length} recent challenges from storage`
+        );
       }
     } catch (error) {
-      console.warn("⚠️ Could not load recent challenges from localStorage:", error);
+      console.warn(
+        "⚠️ Could not load recent challenges from localStorage:",
+        error
+      );
       this.recentChallenges = [];
     }
   }
 
   saveRecentChallenges() {
     try {
-      localStorage.setItem('fistroulette_recent', JSON.stringify(this.recentChallenges));
+      localStorage.setItem(
+        "fistroulette_recent",
+        JSON.stringify(this.recentChallenges)
+      );
     } catch (error) {
-      console.warn("⚠️ Could not save recent challenges to localStorage:", error);
+      console.warn(
+        "⚠️ Could not save recent challenges to localStorage:",
+        error
+      );
     }
   }
 
@@ -189,7 +206,7 @@ class FutureRoulette {
     this.isSpinning = true;
     this.elements.spinButton.disabled = true;
     this.elements.spinButton.querySelector(".button-text").textContent =
-      "GIRANDO...";
+      "SPINNING...";
 
     // Seleccionar desafío
     const selectedChallenge = this.selectRandomChallenge();
@@ -212,8 +229,9 @@ class FutureRoulette {
 
   showSpinner() {
     // Ocultar mensaje por defecto
-    const defaultMessage = this.elements.spinnerArea.querySelector('.default-message');
-    if (defaultMessage) defaultMessage.style.display = 'none';
+    const defaultMessage =
+      this.elements.spinnerArea.querySelector(".default-message");
+    if (defaultMessage) defaultMessage.style.display = "none";
 
     // Crear overlay de spinner
     const spinnerOverlay = document.createElement("div");
@@ -222,7 +240,7 @@ class FutureRoulette {
     spinnerOverlay.innerHTML = `
       <div class="spinner">
         <div class="spinner-circle"></div>
-        <div class="spinner-text">GIRANDO...</div>
+        <div class="spinner-text">SPINNING...</div>
       </div>
     `;
 
@@ -245,10 +263,10 @@ class FutureRoulette {
   showWinningResult(challenge) {
     // Mostrar el número ganador en el área del spinner
     this.elements.spinnerArea.innerHTML = `
-      <h2 class="roulette-title">RULETA DE DESAFÍOS</h2>
+      <h2 class="roulette-title">CHALLENGE ROULETTE</h2>
       <div class="winning-display">
         <div class="winning-number">${challenge.id}</div>
-        <div class="winning-label">¡Desafío seleccionado!</div>
+        <div class="winning-label">Challenge selected!</div>
       </div>
     `;
   }
@@ -264,20 +282,21 @@ class FutureRoulette {
     if (this.recentChallenges.length > 3) {
       this.recentChallenges = this.recentChallenges.slice(0, 3); // Mantener solo los últimos 3
     }
-    
+
     // Guardar en localStorage
     this.saveRecentChallenges();
 
     // Habilitar botón de nuevo
     setTimeout(() => {
       this.elements.spinButton.disabled = false;
-      this.elements.spinButton.querySelector(".button-text").textContent = "¡GIRA LA RULETA!";
+      this.elements.spinButton.querySelector(".button-text").textContent =
+        "SPIN THE ROULETTE!";
       this.isSpinning = false;
-      
+
       // Solo restaurar área de spinner sin resetear textos
       this.elements.spinnerArea.innerHTML = `
-        <h2 class="roulette-title">RULETA DE DESAFÍOS</h2>
-        <div class="default-message">listo para el siguiente</div>
+        <h2 class="roulette-title">CHALLENGE ROULETTE</h2>
+        <div class="default-message">ready for the next one</div>
       `;
     }, 2000);
 
@@ -384,20 +403,21 @@ class FutureRoulette {
   reset() {
     this.recentChallenges = [];
     this.saveRecentChallenges();
-    
+
     // Resetear a mensajes iniciales
-    this.elements.challengeEs.textContent = "empieza a jugar";
+    this.elements.challengeEs.textContent = "start playing";
     this.elements.challengeRu.textContent = "начни играть";
     this.elements.challengeEn.textContent = "start playing";
-    
-    this.elements.spinButton.querySelector(".button-text").textContent = "GIRAR RULETA";
+
+    this.elements.spinButton.querySelector(".button-text").textContent =
+      "SPIN ROULETTE";
     this.elements.spinButton.disabled = false;
     this.isSpinning = false;
-    
+
     // Restaurar área de spinner
     this.elements.spinnerArea.innerHTML = `
-      <h2 class="roulette-title">RULETA DE DESAFÍOS</h2>
-      <div class="default-message">empieza a jugar</div>
+      <h2 class="roulette-title">CHALLENGE ROULETTE</h2>
+      <div class="default-message">start playing</div>
     `;
 
     console.log("🔄 Game reset");
@@ -407,7 +427,8 @@ class FutureRoulette {
   showErrorState(message) {
     // Deshabilitar botón de giro
     this.elements.spinButton.disabled = true;
-    this.elements.spinButton.querySelector(".button-text").textContent = "ERROR";
+    this.elements.spinButton.querySelector(".button-text").textContent =
+      "ERROR";
 
     // Mostrar mensaje de error en los 3 idiomas
     this.elements.challengeEs.textContent = message;
@@ -419,7 +440,7 @@ class FutureRoulette {
       <div class="error-state">
         <div class="error-icon">⚠️</div>
         <div class="error-message">${message}</div>
-        <div class="error-suggestion">Por favor, recarga la página.</div>
+        <div class="error-suggestion">Please reload the page.</div>
       </div>
     `;
 
@@ -462,9 +483,9 @@ document.addEventListener("DOMContentLoaded", () => {
       box-shadow: 0 0 20px rgba(153, 0, 38, 0.8);
     `;
     errorContainer.innerHTML = `
-      <h3>Error al cargar el juego</h3>
+      <h3>Error loading the game</h3>
       <p>${error.message}</p>
-      <p><small>Por favor, recarga la página.</small></p>
+      <p><small>Please reload the page.</small></p>
     `;
     document.body.appendChild(errorContainer);
   }
