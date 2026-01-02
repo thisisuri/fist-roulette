@@ -86,7 +86,7 @@ class FutureRoulette {
 
     // Crear las casillas de la ruleta (duplicadas para loop infinito)
     const totalCopies = 5; // Número de copias para loop suave
-    
+
     for (let copy = 0; copy < totalCopies; copy++) {
       this.challenges.forEach((challenge, index) => {
         const slot = document.createElement("div");
@@ -103,7 +103,7 @@ class FutureRoulette {
     const indicator = document.createElement("div");
     indicator.className = "roulette-indicator";
     indicator.innerHTML = "▼";
-    
+
     this.elements.wheelTrack.appendChild(indicator);
     this.elements.wheelTrack.appendChild(wheel);
 
@@ -115,7 +115,9 @@ class FutureRoulette {
       this.elements.challengeText.textContent = this.challenges[0].text;
     }
 
-    console.log(`🎰 Created infinite roulette wheel with ${this.challenges.length} slots`);
+    console.log(
+      `🎰 Created infinite roulette wheel with ${this.challenges.length} slots`
+    );
   }
 
   centerWheel() {
@@ -125,31 +127,10 @@ class FutureRoulette {
       const containerWidth = container.offsetWidth;
       const slotWidth = 120;
       // Centrar en la segunda copia para permitir movimiento en ambas direcciones
-      const centerOffset = (containerWidth / 2) - (slotWidth / 2);
+      const centerOffset = containerWidth / 2 - slotWidth / 2;
       const initialPosition = this.challenges.length * slotWidth; // Empezar en la segunda copia
       wheel.style.transform = `translateX(${centerOffset - initialPosition}px)`;
     }
-    });
-
-    this.elements.slideTrack.addEventListener("touchend", (e) => {
-      if (this.isSpinning) return;
-
-      const endX = e.changedTouches[0].clientX;
-      const endY = e.changedTouches[0].clientY;
-      const diffX = startX - endX;
-      const diffY = startY - endY;
-
-      // Solo procesar si el movimiento horizontal es mayor que el vertical
-      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
-        if (diffX > 0) {
-          // Swipe izquierda - ir al siguiente
-          this.nextSlide();
-        } else {
-          // Swipe derecha - ir al anterior
-          this.previousSlide();
-        }
-      }
-    });
   }
 
   setupEventListeners() {
