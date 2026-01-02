@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Future Roulette 2025</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="container">
+      <div class="background-grid"></div>
+      <div class="glow-overlay"></div>
+
+      <header>
+        <h1 class="title">
+          <span class="future-text">FIST</span>
+          <span class="roulette-text">ROULETTE</span>
+          <span class="year">2026</span>
+        </h1>
+        <div class="subtitle">Desafía tus límites</div>
+      </header>
+
+      <main class="game-area">
+        <div class="roulette-container">
+          <div class="slideshow-container">
+            <div class="slideshow-header">
+              <div class="option-counter" id="optionCounter">1 / 12</div>
+              <div class="slideshow-title">
+                DESAFÍO #<span id="currentNumber">1</span>
+              </div>
+            </div>
+
+            <div class="slideshow-viewer">
+              <div class="slide-track" id="slideTrack">
+                <!-- Los slides se generarán dinámicamente -->
+              </div>
+              <div class="slide-indicator"></div>
+            </div>
+
+            <div class="slideshow-navigation">
+              <button class="nav-button prev" id="prevButton" disabled>
+                <span>‹</span>
+              </button>
+              <div class="slide-dots" id="slideDots">
+                <!-- Los dots se generarán dinámicamente -->
+              </div>
+              <button class="nav-button next" id="nextButton">
+                <span>›</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="control-panel">
+            <button class="spin-button" id="spinButton">
+              <span class="button-text">INICIAR RULETA</span>
+              <div class="button-glow"></div>
+            </button>
+          </div>
+        </div>
+
+        <div class="result-panel">
+          <div class="current-challenge" id="currentChallenge">
+            <div class="challenge-label">TU DESAFÍO:</div>
+            <div class="challenge-text" id="challengeText">
+              ¡Haz girar la ruleta para comenzar!
+            </div>
+          </div>
+        </div>
+      </main>
+
+      <footer>
+        <div class="version">v2026.1.0</div>
+      </footer>
+    </div>
+
+    <div class="particles" id="particles">
+      <!-- Partículas animadas -->
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
