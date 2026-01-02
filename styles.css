@@ -172,76 +172,87 @@ header {
 
 .slideshow-viewer {
     position: relative;
-    height: 120px;
+    height: 150px;
     overflow: hidden;
     border-radius: 15px;
-    background: rgba(0, 0, 0, 0.3);
+    background: rgba(0, 0, 0, 0.4);
     margin-bottom: 25px;
-    border: 2px solid rgba(255, 0, 64, 0.2);
+    border: 3px solid rgba(255, 0, 64, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .slide-track {
     position: relative;
+    width: 100%;
     height: 100%;
-    padding: 10px 0;
-}
-
-.carousel-container {
     display: flex;
-    align-items: center;
-    height: 100%;
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
-    gap: 15px;
-}
-
-.carousel-item {
-    display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-width: 80px;
-    height: 80px;
+}
+
+.roulette-indicator {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 2rem;
+    color: var(--primary-red);
+    text-shadow: var(--shadow-red);
+    z-index: 10;
+    animation: pulse 2s infinite;
+}
+
+.roulette-wheel {
+    display: flex;
+    align-items: center;
+    height: 100px;
+    transition: transform 3s cubic-bezier(0.25, 0.1, 0.25, 1);
+}
+
+.roulette-slot {
+    width: 120px;
+    height: 100px;
     background: var(--bg-dark-secondary);
-    border: 2px solid rgba(255, 0, 64, 0.2);
-    border-radius: 12px;
-    padding: 8px;
-    transition: all 0.3s ease;
-    cursor: pointer;
+    border: 2px solid rgba(255, 0, 64, 0.3);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 2px;
     flex-shrink: 0;
+    position: relative;
 }
 
-.carousel-item:hover {
-    border-color: var(--primary-red);
-    transform: scale(1.05);
+.roulette-slot::before {
+    content: '';
+    position: absolute;
+    top: -3px;
+    left: -3px;
+    right: -3px;
+    bottom: -3px;
+    background: linear-gradient(45deg, transparent, rgba(255, 0, 64, 0.1), transparent);
+    border-radius: 12px;
+    opacity: 0;
+    transition: opacity 0.3s ease;
 }
 
-.carousel-item.active {
-    background: rgba(255, 0, 64, 0.15);
-    border: 2px solid var(--primary-red);
-    box-shadow: 0 0 20px rgba(255, 0, 64, 0.4);
-    transform: scale(1.1);
+.roulette-slot:nth-child(odd) {
+    background: rgba(255, 0, 64, 0.05);
 }
 
-.carousel-number {
+.slot-number {
     font-family: 'Orbitron', monospace;
-    font-size: 1.8rem;
+    font-size: 2.5rem;
     font-weight: 900;
     color: var(--primary-red);
     text-shadow: var(--shadow-red);
-    line-height: 1;
 }
 
-.carousel-item.active .carousel-number {
-    color: var(--accent-red);
-    text-shadow: 0 0 15px var(--primary-red);
-}
-
-.carousel-label {
-    font-size: 0.7rem;
-    color: var(--text-gray);
-    font-weight: 500;
-    margin-top: 2px;
-    text-align: center;
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
+    50% { opacity: 0.7; transform: translateX(-50%) scale(1.1); }
 }
 
 .slide-indicator {

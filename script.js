@@ -9,13 +9,9 @@ class FutureRoulette {
 
     this.elements = {
       slideTrack: document.getElementById("slideTrack"),
-      slideDots: document.getElementById("slideDots"),
       spinButton: document.getElementById("spinButton"),
       challengeText: document.getElementById("challengeText"),
       particles: document.getElementById("particles"),
-      currentNumber: document.getElementById("currentNumber"),
-      prevButton: document.getElementById("prevButton"),
-      nextButton: document.getElementById("nextButton"),
     };
 
     this.currentSlide = 0;
@@ -26,13 +22,9 @@ class FutureRoulette {
   validateDOM() {
     const requiredElements = [
       "slideTrack",
-      "slideDots",
       "spinButton",
       "challengeText",
       "particles",
-      "currentNumber",
-      "prevButton",
-      "nextButton",
     ];
 
     const missingElements = requiredElements.filter(
@@ -50,10 +42,9 @@ class FutureRoulette {
   async init() {
     try {
       await this.loadChallenges();
-      this.createRoulette();
+      this.createWheel();
       this.setupEventListeners();
       this.createParticles();
-      this.updateCounter();
       // Mostrar el texto del primer desafío
       if (this.challenges[0]) {
         this.elements.challengeText.textContent = this.challenges[0].text;
@@ -84,46 +75,41 @@ class FutureRoulette {
     }
   }
 
-  createRoulette() {
-    // Crear carrusel horizontal
+  createWheel() {
+    // Crear ruleta horizontal con casillas
     this.elements.slideTrack.innerHTML = "";
-    this.elements.slideDots.innerHTML = "";
 
-    // Crear contenedor de carrusel
-    const carousel = document.createElement("div");
-    carousel.className = "carousel-container";
+    // Crear contenedor de la ruleta
+    const wheel = document.createElement("div");
+    wheel.className = "roulette-wheel";
+    wheel.id = "rouletteWheel";
 
+    // Crear las casillas de la ruleta
     this.challenges.forEach((challenge, index) => {
-      // Crear item del carrusel
-      const item = document.createElement("div");
-      item.className = index === 0 ? "carousel-item active" : "carousel-item";
-      item.dataset.index = index;
-      item.innerHTML = `
-        <div class="carousel-number">${challenge.id}</div>
-        <div class="carousel-label">Desafío</div>
+      const slot = document.createElement("div");
+      slot.className = "roulette-slot";
+      slot.dataset.index = index;
+      slot.innerHTML = `
+        <div class="slot-number">${challenge.id}</div>
       `;
-
-      // Agregar evento de click
-      item.addEventListener("click", () => this.selectItem(index));
-
-      carousel.appendChild(item);
-
-      // Crear dot indicador
-      const dot = document.createElement("div");
-      dot.className = index === 0 ? "dot active" : "dot";
-      dot.addEventListener("click", () => this.selectItem(index));
-      this.elements.slideDots.appendChild(dot);
+      wheel.appendChild(slot);
     });
 
-    this.elements.slideTrack.appendChild(carousel);
-    this.centerCarousel();
-    this.updateNavigation();
+    // Crear indicador de posición
+    const indicator = document.createElement("div");
+    indicator.className = "roulette-indicator";
+    indicator.innerHTML = "▼";
 
-    // Agregar soporte para navegación táctil
-    this.setupTouchNavigation();
+    this.elements.slideTrack.appendChild(indicator);
+    this.elements.slideTrack.appendChild(wheel);
+
+    // Mostrar primer desafío
+    if (this.challenges[0]) {
+      this.elements.challengeText.textContent = this.challenges[0].text;
+    }
 
     console.log(
-      `🎯 Created horizontal carousel with ${this.challenges.length} items`
+      `🎰 Created roulette wheel with ${this.challenges.length} slots`
     );
   }
 
@@ -159,23 +145,15 @@ class FutureRoulette {
 
   setupEventListeners() {
     this.elements.spinButton.addEventListener("click", () => this.spin());
-    this.elements.prevButton.addEventListener("click", () =>
-      this.previousSlide()
-    );
-    this.elements.nextButton.addEventListener("click", () => this.nextSlide());
 
     // Efectos de sonido con Web Audio API (opcional)
     this.setupAudioContext();
 
-    // Atajos de teclado
+    // Atajo de teclado solo para girar
     document.addEventListener("keydown", (e) => {
       if (e.code === "Space" && !this.isSpinning) {
         e.preventDefault();
         this.spin();
-      } else if (e.code === "ArrowLeft" && !this.isSpinning) {
-        this.previousSlide();
-      } else if (e.code === "ArrowRight" && !this.isSpinning) {
-        this.nextSlide();
       }
     });
   }
@@ -311,7 +289,7 @@ class FutureRoulette {
     }
   }
 
-  calculateTargetSlide(targetChallenge) {
+  calculateTargetIndex(targetChallenge) {
     return this.challenges.findIndex((c) => c.id === targetChallenge.id);
   }
 
@@ -323,49 +301,49 @@ class FutureRoulette {
     this.elements.spinButton.querySelector(".button-text").textContent =
       "GIRANDO...";
 
-    // Deshabilitar navegación manual
-    this.elements.prevButton.disabled = true;
-    this.elements.nextButton.disabled = true;
-
     // Efecto visual de inicio
     this.addSpinEffects();
 
     // Seleccionar desafío
     const selectedChallenge = this.selectRandomChallenge();
-    const targetSlide = this.calculateTargetSlide(selectedChallenge);
+    const targetIndex = this.calculateTargetIndex(selectedChallenge);
 
-    // Simular efecto de giro pasando por varios slides
-    await this.animateSlideshow(targetSlide);
+    // Animar la ruleta
+    await this.animateWheel(targetIndex);
 
     // Finalizar
-    this.completeSpinOLD(selectedChallenge);
+    this.completeSpin(selectedChallenge);
 
-    console.log(`🎲 Spinning to challenge: ${selectedChallenge.text}`);
+    console.log(`🎲 Wheel stopped at challenge: ${selectedChallenge.text}`);
   }
 
-  async animateSlideshow(targetSlide) {
+  async animateWheel(targetIndex) {
     return new Promise((resolve) => {
-      // Crear animación de carrusel rápido
-      const steps = 15 + Math.floor(Math.random() * 10); // 15-25 pasos
-      const stepDuration = 150; // ms por paso
-      let currentStep = 0;
+      const wheel = document.getElementById("rouletteWheel");
+      const slotWidth = 120; // Ancho de cada casilla
+      const totalSlots = this.challenges.length;
 
-      const carouselAnimation = setInterval(() => {
-        // Ir a un item aleatorio durante la animación
-        const randomSlide = Math.floor(Math.random() * this.challenges.length);
-        this.selectItem(randomSlide);
+      // Calcular rotaciones adicionales para efecto visual
+      const extraRotations = 3 + Math.random() * 2; // 3-5 vueltas completas
+      const totalDistance =
+        extraRotations * totalSlots * slotWidth + targetIndex * slotWidth;
 
-        currentStep++;
+      // Aplicar animación CSS
+      wheel.style.transition = "transform 3s cubic-bezier(0.25, 0.1, 0.25, 1)";
+      wheel.style.transform = `translateX(-${totalDistance}px)`;
 
-        if (currentStep >= steps) {
-          clearInterval(carouselAnimation);
-          // Ir al item objetivo final
-          setTimeout(() => {
-            this.selectItem(targetSlide);
-            resolve();
-          }, stepDuration);
-        }
-      }, stepDuration);
+      // Sonidos durante la rotación
+      this.playSpinSounds();
+
+      setTimeout(() => {
+        // Posicionar en la casilla final
+        wheel.style.transition = "transform 0.5s ease-out";
+        wheel.style.transform = `translateX(-${targetIndex * slotWidth}px)`;
+
+        setTimeout(() => {
+          resolve();
+        }, 500);
+      }, 3000);
     });
   }
 
@@ -376,6 +354,36 @@ class FutureRoulette {
     // Efecto de brillo en el slideshow
     const slideshowContainer = document.querySelector(".slideshow-container");
     slideshowContainer.style.boxShadow = "0 0 50px rgba(255, 0, 64, 0.8)";
+  }
+
+  async animateWheel(targetIndex) {
+    return new Promise((resolve) => {
+      const wheel = document.getElementById("rouletteWheel");
+      const slotWidth = 120; // Ancho de cada casilla
+      const totalSlots = this.challenges.length;
+
+      // Calcular rotaciones adicionales para efecto visual
+      const extraRotations = 3 + Math.random() * 2; // 3-5 vueltas completas
+      const totalDistance =
+        extraRotations * totalSlots * slotWidth + targetIndex * slotWidth;
+
+      // Aplicar animación CSS
+      wheel.style.transition = "transform 3s cubic-bezier(0.25, 0.1, 0.25, 1)";
+      wheel.style.transform = `translateX(-${totalDistance}px)`;
+
+      // Sonidos durante la rotación
+      this.playSpinSounds();
+
+      setTimeout(() => {
+        // Posicionar en la casilla final
+        wheel.style.transition = "transform 0.5s ease-out";
+        wheel.style.transform = `translateX(-${targetIndex * slotWidth}px)`;
+
+        setTimeout(() => {
+          resolve();
+        }, 500);
+      }, 3000);
+    });
   }
 
   playSpinSounds() {
@@ -393,11 +401,11 @@ class FutureRoulette {
     }, 2800);
   }
 
-  completeSpinOLD(selectedChallenge) {
+  completeSpin(selectedChallenge) {
     this.isSpinning = false;
     this.elements.spinButton.disabled = false;
     this.elements.spinButton.querySelector(".button-text").textContent =
-      "GIRAR NUEVA RULETA";
+      "GIRAR RULETA";
 
     // Actualizar desafío actual
     this.elements.challengeText.textContent = selectedChallenge.text;
@@ -411,12 +419,11 @@ class FutureRoulette {
     // Efectos visuales de completación
     this.addCompletionEffects();
 
-    // Restaurar navegación
-    this.updateNavigation();
-
     // Limpiar efectos visuales
     const slideshowContainer = document.querySelector(".slideshow-container");
-    slideshowContainer.style.boxShadow = "var(--shadow-red)";
+    if (slideshowContainer) {
+      slideshowContainer.style.boxShadow = "var(--shadow-red)";
+    }
 
     console.log(`✅ Challenge selected: ${selectedChallenge.text}`);
   }
@@ -527,14 +534,17 @@ class FutureRoulette {
   // Método para reiniciar el juego
   reset() {
     this.recentChallenges = [];
-    this.currentSlide = 0;
     this.elements.challengeText.textContent =
       "¡Haz girar la ruleta para comenzar!";
     this.elements.spinButton.querySelector(".button-text").textContent =
       "INICIAR RULETA";
 
-    // Resetear carrusel a la primera posición
-    this.selectItem(0);
+    // Resetear ruleta a la posición inicial
+    const wheel = document.getElementById("rouletteWheel");
+    if (wheel) {
+      wheel.style.transition = "transform 0.5s ease";
+      wheel.style.transform = "translateX(0px)";
+    }
 
     console.log("🔄 Game reset");
   }
