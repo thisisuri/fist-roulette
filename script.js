@@ -232,20 +232,99 @@ class FutureRoulette {
     this.elements.spinButton.querySelector(".button-text").textContent =
       "GIRANDO...";
 
-    // Efecto visual de inicio
-    this.addSpinEffects();
-
     // Seleccionar desafío
     const selectedChallenge = this.selectRandomChallenge();
-    const targetIndex = this.calculateTargetIndex(selectedChallenge);
 
-    // Animar la ruleta
-    await this.animateWheel(targetIndex);
+    // Mostrar spinner en lugar de animación
+    this.showSpinner();
+
+    // Esperar 2 segundos
+    await this.waitForSpinner();
+
+    // Ocultar spinner y mostrar resultado
+    this.hideSpinner();
+    this.centerOnWinningSlot(selectedChallenge.id);
 
     // Finalizar
     this.completeSpin(selectedChallenge);
 
     console.log(`🎲 Wheel stopped at challenge: ${selectedChallenge.text}`);
+  }
+
+  showSpinner() {
+    // Crear overlay de spinner
+    const spinnerOverlay = document.createElement("div");
+    spinnerOverlay.id = "spinnerOverlay";
+    spinnerOverlay.className = "spinner-overlay";
+    spinnerOverlay.innerHTML = `
+      <div class="spinner">
+        <div class="spinner-circle"></div>
+        <div class="spinner-text">GIRANDO...</div>
+      </div>
+    `;
+
+    // Ocultar la ruleta temporalmente
+    const wheel = document.getElementById("rouletteWheel");
+    const indicator = document.querySelector(".roulette-indicator");
+    if (wheel) wheel.style.opacity = "0.3";
+    if (indicator) indicator.style.opacity = "0.3";
+
+    this.elements.wheelTrack.appendChild(spinnerOverlay);
+
+    // Efectos de sonido
+    this.playSpinSounds();
+  }
+
+  async waitForSpinner() {
+    return new Promise((resolve) => {
+      setTimeout(resolve, 2000);
+    });
+  }
+
+  hideSpinner() {
+    const spinnerOverlay = document.getElementById("spinnerOverlay");
+    if (spinnerOverlay) {
+      spinnerOverlay.remove();
+    }
+
+    // Restaurar visibilidad de la ruleta
+    const wheel = document.getElementById("rouletteWheel");
+    const indicator = document.querySelector(".roulette-indicator");
+    if (wheel) wheel.style.opacity = "1";
+    if (indicator) indicator.style.opacity = "1";
+  }
+
+  centerOnWinningSlot(winningId) {
+    const wheel = document.getElementById("rouletteWheel");
+    const container = this.elements.wheelTrack;
+    const slots = wheel.querySelectorAll(".roulette-slot");
+
+    // Encontrar la casilla con el número ganador en la segunda copia (posición inicial)
+    const totalSlots = this.challenges.length;
+    let targetSlot = null;
+
+    slots.forEach((slot, index) => {
+      const slotNumber = parseInt(
+        slot.querySelector(".slot-number").textContent
+      );
+      const isInSecondCopy = index >= totalSlots && index < totalSlots * 2;
+
+      if (slotNumber === winningId && isInSecondCopy) {
+        targetSlot = slot;
+      }
+    });
+
+    if (targetSlot && container) {
+      const containerWidth = container.offsetWidth;
+      const slotWidth = 120;
+      const centerOffset = containerWidth / 2 - slotWidth / 2;
+      const slotIndex = Array.from(slots).indexOf(targetSlot);
+      const targetPosition = slotIndex * slotWidth;
+
+      wheel.style.transition =
+        "transform 1s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+      wheel.style.transform = `translateX(${centerOffset - targetPosition}px)`;
+    }
   }
 
   async animateWheel(targetIndex) {
@@ -335,12 +414,6 @@ class FutureRoulette {
 
     // Efectos visuales de completación
     this.addCompletionEffects();
-
-    // Limpiar efectos visuales
-    const wheelContainer = document.querySelector(".roulette-wheel-container");
-    if (wheelContainer) {
-      wheelContainer.style.boxShadow = "var(--shadow-red)";
-    }
 
     console.log(`✅ Challenge selected: ${selectedChallenge.text}`);
   }
