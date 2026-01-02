@@ -28,14 +28,9 @@
 
       <main class="game-area">
         <div class="roulette-container">
-          <div class="roulette-wheel-container">
+          <div class="spinner-area" id="spinnerArea">
             <h2 class="roulette-title">RULETA DE DESAFÍOS</h2>
-
-            <div class="wheel-viewer">
-              <div class="wheel-track" id="wheelTrack">
-                <!-- Las casillas se generarán dinámicamente -->
-              </div>
-            </div>
+            <div class="default-message">cargando...</div>
           </div>
 
           <div class="control-panel">
@@ -49,8 +44,19 @@
         <div class="result-panel">
           <div class="current-challenge" id="currentChallenge">
             <div class="challenge-label">TU DESAFÍO:</div>
-            <div class="challenge-text" id="challengeText">
-              ¡Haz girar la ruleta para comenzar!
+            <div class="challenge-multilang" id="challengeMultilang">
+              <div class="challenge-lang" id="challengeEs">
+                <span class="flag">🇪🇸</span>
+                <span class="challenge-text">empieza a jugar</span>
+              </div>
+              <div class="challenge-lang" id="challengeRu">
+                <span class="flag">🇷🇺</span>
+                <span class="challenge-text">empieza a jugar</span>
+              </div>
+              <div class="challenge-lang" id="challengeEn">
+                <span class="flag">🇬🇧</span>
+                <span class="challenge-text">empieza a jugar</span>
+              </div>
             </div>
           </div>
         </div>

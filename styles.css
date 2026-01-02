@@ -142,6 +142,59 @@ header {
     width: 100%;
 }
 
+/* Spinner Area Styles */
+.spinner-area {
+    position: relative;
+    height: 150px;
+    overflow: hidden;
+    border-radius: 15px;
+    background: rgba(0, 0, 0, 0.4);
+    border: 3px solid rgba(255, 0, 64, 0.3);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+}
+
+.default-message {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: rgba(255, 255, 255, 0.5);
+    text-transform: lowercase;
+    letter-spacing: 1px;
+    text-align: center;
+    opacity: 0.7;
+}
+
+.winning-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    animation: winningPulse 0.5s ease-in-out 3;
+}
+
+.winning-number {
+    font-family: 'Orbitron', monospace;
+    font-size: 4rem;
+    font-weight: 900;
+    color: var(--accent-red);
+    text-shadow: 0 0 20px var(--primary-red), 0 0 30px var(--primary-red);
+    animation: winningGlow 0.5s ease-in-out infinite alternate;
+}
+
+.winning-label {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--primary-red);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    text-shadow: var(--shadow-red);
+}
+
 .roulette-title {
     font-family: 'Orbitron', monospace;
     font-size: 1.2rem;
@@ -510,9 +563,52 @@ header {
     font-family: 'Orbitron', monospace;
     font-size: 0.9rem;
     color: var(--accent-cyan);
-    margin-bottom: 15px;
+    margin-bottom: 25px;
     text-transform: uppercase;
     letter-spacing: 2px;
+}
+
+.challenge-multilang {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    align-items: center;
+}
+
+.challenge-lang {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
+    max-width: 600px;
+    padding: 15px;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 0, 64, 0.2);
+    transition: all 0.3s ease;
+}
+
+.challenge-lang:hover {
+    background: rgba(255, 0, 64, 0.1);
+    border-color: rgba(255, 0, 64, 0.4);
+    transform: translateX(5px);
+}
+
+.challenge-lang .flag {
+    font-size: 2rem;
+    flex-shrink: 0;
+    width: 40px;
+    text-align: center;
+}
+
+.challenge-lang .challenge-text {
+    font-family: 'Exo 2', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 400;
+    color: var(--text-light);
+    line-height: 1.4;
+    text-align: left;
+    flex: 1;
 }
 
 .challenge-text {
@@ -681,6 +777,27 @@ footer {
     
     .current-challenge {
         padding: 20px;
+    }
+    
+    .challenge-lang {
+        flex-direction: column;
+        text-align: center;
+        gap: 10px;
+        padding: 12px;
+        max-width: 100%;
+    }
+
+    .challenge-lang .flag {
+        font-size: 1.5rem;
+    }
+
+    .challenge-lang .challenge-text {
+        font-size: 0.95rem;
+        text-align: center;
+    }
+    
+    .challenge-multilang {
+        gap: 15px;
     }
     
     .challenge-text {

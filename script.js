@@ -8,9 +8,11 @@ class FutureRoulette {
     this.validateDOM();
 
     this.elements = {
-      wheelTrack: document.getElementById("wheelTrack"),
+      spinnerArea: document.getElementById("spinnerArea"),
       spinButton: document.getElementById("spinButton"),
-      challengeText: document.getElementById("challengeText"),
+      challengeEs: document.getElementById("challengeEs").querySelector(".challenge-text"),
+      challengeRu: document.getElementById("challengeRu").querySelector(".challenge-text"),
+      challengeEn: document.getElementById("challengeEn").querySelector(".challenge-text"),
       particles: document.getElementById("particles"),
     };
 
@@ -19,9 +21,12 @@ class FutureRoulette {
 
   validateDOM() {
     const requiredElements = [
-      "wheelTrack",
-      "spinButton",
-      "challengeText",
+      "spinnerArea",
+      "spinButton", 
+      "challengeMultilang",
+      "challengeEs",
+      "challengeRu", 
+      "challengeEn",
       "particles",
     ];
 
@@ -40,17 +45,50 @@ class FutureRoulette {
   async init() {
     try {
       await this.loadChallenges();
-      this.createWheel();
       this.setupEventListeners();
       this.createParticles();
-      // Mostrar el texto del primer desafío
-      if (this.challenges[0]) {
-        this.elements.challengeText.textContent = this.challenges[0].text;
+      
+      // Cargar historial desde localStorage
+      this.loadRecentChallenges();
+      
+      // Solo mostrar "empieza a jugar" si nunca se ha jugado
+      if (this.recentChallenges.length === 0) {
+        this.elements.challengeEs.textContent = "empieza a jugar";
+        this.elements.challengeRu.textContent = "начни играть";
+        this.elements.challengeEn.textContent = "start playing";
+      } else {
+        // Si ya se ha jugado, mostrar el último desafío
+        const lastChallenge = this.recentChallenges[0];
+        this.elements.challengeEs.textContent = lastChallenge.texts.es;
+        this.elements.challengeRu.textContent = lastChallenge.texts.ru;
+        this.elements.challengeEn.textContent = lastChallenge.texts.en;
       }
+      
       console.log("🎮 Fist Roulette 2026 initialized successfully!");
     } catch (error) {
       console.error("❌ Error initializing roulette:", error);
       this.showErrorState(error.message);
+    }
+  }
+
+  loadRecentChallenges() {
+    try {
+      const stored = localStorage.getItem('fistroulette_recent');
+      if (stored) {
+        this.recentChallenges = JSON.parse(stored);
+        console.log(`📚 Loaded ${this.recentChallenges.length} recent challenges from storage`);
+      }
+    } catch (error) {
+      console.warn("⚠️ Could not load recent challenges from localStorage:", error);
+      this.recentChallenges = [];
+    }
+  }
+
+  saveRecentChallenges() {
+    try {
+      localStorage.setItem('fistroulette_recent', JSON.stringify(this.recentChallenges));
+    } catch (error) {
+      console.warn("⚠️ Could not save recent challenges to localStorage:", error);
     }
   }
 
@@ -73,74 +111,6 @@ class FutureRoulette {
     }
   }
 
-  createWheel() {
-    // Crear ruleta horizontal con casillas
-    this.elements.wheelTrack.innerHTML = "";
-
-    // Crear contenedor de la ruleta
-    const wheel = document.createElement("div");
-    wheel.className = "roulette-wheel";
-    wheel.id = "rouletteWheel";
-
-    // Crear las casillas de la ruleta (duplicadas para loop infinito)
-    const totalCopies = 5; // Número de copias para loop suave
-
-    for (let copy = 0; copy < totalCopies; copy++) {
-      this.challenges.forEach((challenge, index) => {
-        const slot = document.createElement("div");
-        slot.className = "roulette-slot";
-        slot.dataset.originalIndex = index;
-        slot.innerHTML = `
-          <div class="slot-number">${challenge.id}</div>
-        `;
-        wheel.appendChild(slot);
-      });
-    }
-
-    // Crear indicador de posición (centrado)
-    const indicator = document.createElement("div");
-    indicator.className = "roulette-indicator";
-    indicator.innerHTML = "▼";
-
-    this.elements.wheelTrack.appendChild(indicator);
-    this.elements.wheelTrack.appendChild(wheel);
-
-    // Posicionar en el centro inicialmente
-    this.centerWheel();
-
-    // Mostrar primer desafío
-    if (this.challenges[0]) {
-      this.elements.challengeText.textContent = this.challenges[0].text;
-    }
-
-    console.log(
-      `🎰 Created infinite roulette wheel with ${this.challenges.length} slots`
-    );
-  }
-
-  centerWheel() {
-    setTimeout(() => {
-      const wheel = document.getElementById("rouletteWheel");
-      const container = this.elements.wheelTrack;
-      if (wheel && container) {
-        const containerWidth = container.offsetWidth;
-        const slotWidth = 120;
-        // Centrar en la segunda copia para permitir movimiento en ambas direcciones
-        const centerOffset = containerWidth / 2 - slotWidth / 2;
-        const initialPosition = this.challenges.length * slotWidth; // Empezar en la segunda copia
-        wheel.style.transition = "none"; // Sin animación para el centrado inicial
-        wheel.style.transform = `translateX(${
-          centerOffset - initialPosition
-        }px)`;
-
-        // Restaurar transiciones después de un momento
-        setTimeout(() => {
-          wheel.style.transition = "transform 0.5s ease";
-        }, 100);
-      }
-    }, 50); // Pequeño delay para asegurar que el DOM esté listo
-  }
-
   setupEventListeners() {
     this.elements.spinButton.addEventListener("click", () => this.spin());
 
@@ -152,13 +122,6 @@ class FutureRoulette {
       if (e.code === "Space" && !this.isSpinning) {
         e.preventDefault();
         this.spin();
-      }
-    });
-
-    // Recentrar ruleta al redimensionar ventana
-    window.addEventListener("resize", () => {
-      if (!this.isSpinning) {
-        this.centerWheel();
       }
     });
   }
@@ -235,7 +198,7 @@ class FutureRoulette {
     // Seleccionar desafío
     const selectedChallenge = this.selectRandomChallenge();
 
-    // Mostrar spinner en lugar de animación
+    // Mostrar spinner
     this.showSpinner();
 
     // Esperar 2 segundos
@@ -243,15 +206,19 @@ class FutureRoulette {
 
     // Ocultar spinner y mostrar resultado
     this.hideSpinner();
-    this.centerOnWinningSlot(selectedChallenge.id);
+    this.showWinningResult(selectedChallenge);
 
     // Finalizar
     this.completeSpin(selectedChallenge);
 
-    console.log(`🎲 Wheel stopped at challenge: ${selectedChallenge.text}`);
+    console.log(`🎲 Selected challenge: ${selectedChallenge.text}`);
   }
 
   showSpinner() {
+    // Ocultar mensaje por defecto
+    const defaultMessage = this.elements.spinnerArea.querySelector('.default-message');
+    if (defaultMessage) defaultMessage.style.display = 'none';
+
     // Crear overlay de spinner
     const spinnerOverlay = document.createElement("div");
     spinnerOverlay.id = "spinnerOverlay";
@@ -263,13 +230,7 @@ class FutureRoulette {
       </div>
     `;
 
-    // Ocultar la ruleta temporalmente
-    const wheel = document.getElementById("rouletteWheel");
-    const indicator = document.querySelector(".roulette-indicator");
-    if (wheel) wheel.style.opacity = "0.3";
-    if (indicator) indicator.style.opacity = "0.3";
-
-    this.elements.wheelTrack.appendChild(spinnerOverlay);
+    this.elements.spinnerArea.appendChild(spinnerOverlay);
 
     // Efectos de sonido
     this.playSpinSounds();
@@ -286,12 +247,17 @@ class FutureRoulette {
     if (spinnerOverlay) {
       spinnerOverlay.remove();
     }
+  }
 
-    // Restaurar visibilidad de la ruleta
-    const wheel = document.getElementById("rouletteWheel");
-    const indicator = document.querySelector(".roulette-indicator");
-    if (wheel) wheel.style.opacity = "1";
-    if (indicator) indicator.style.opacity = "1";
+  showWinningResult(challenge) {
+    // Mostrar el número ganador en el área del spinner
+    this.elements.spinnerArea.innerHTML = `
+      <h2 class="roulette-title">RULETA DE DESAFÍOS</h2>
+      <div class="winning-display">
+        <div class="winning-number">${challenge.id}</div>
+        <div class="winning-label">¡Desafío seleccionado!</div>
+      </div>
+    `;
   }
 
   centerOnWinningSlot(winningId) {
@@ -368,54 +334,43 @@ class FutureRoulette {
     });
   }
 
-  addSpinEffects() {
-    // Efecto de partículas adicionales
-    this.createBurstParticles();
 
-    // Efecto de brillo en el contenedor de la ruleta
-    const wheelContainer = document.querySelector(".roulette-wheel-container");
-    if (wheelContainer) {
-      wheelContainer.style.boxShadow = "0 0 50px rgba(255, 0, 64, 0.8)";
-    }
-  }
 
-  playSpinSounds() {
-    // Serie de tonos durante el giro
-    const tones = [600, 700, 800, 900, 1000];
-    tones.forEach((frequency, index) => {
-      setTimeout(() => {
-        this.playTone(frequency, 200);
-      }, index * 500);
-    });
+  completeSpin(challenge) {
+    // Actualizar texto del desafío en los 3 idiomas
+    this.elements.challengeEs.textContent = challenge.texts.es;
+    this.elements.challengeRu.textContent = challenge.texts.ru;
+    this.elements.challengeEn.textContent = challenge.texts.en;
 
-    // Tono de finalización
-    setTimeout(() => {
-      this.playTone(1200, 500);
-    }, 2800);
-  }
-
-  completeSpin(selectedChallenge) {
-    this.isSpinning = false;
-    this.elements.spinButton.disabled = false;
-    this.elements.spinButton.querySelector(".button-text").textContent =
-      "GIRAR RULETA";
-
-    // Actualizar desafío actual
-    this.elements.challengeText.textContent = selectedChallenge.text;
-
-    // Marcar visualmente la casilla ganadora
-    this.highlightWinningSlot(selectedChallenge.id);
-
-    // Actualizar historial reciente solo para lógica anti-repetición
-    this.recentChallenges.unshift(selectedChallenge);
+    // Agregar a historial de desafíos recientes
+    this.recentChallenges.unshift(challenge); // Agregar al principio
     if (this.recentChallenges.length > 3) {
-      this.recentChallenges = this.recentChallenges.slice(0, 3);
+      this.recentChallenges = this.recentChallenges.slice(0, 3); // Mantener solo los últimos 3
     }
+    
+    // Guardar en localStorage
+    this.saveRecentChallenges();
 
-    // Efectos visuales de completación
-    this.addCompletionEffects();
+    // Habilitar botón de nuevo
+    setTimeout(() => {
+      this.elements.spinButton.disabled = false;
+      this.elements.spinButton.querySelector(".button-text").textContent = "¡GIRA LA RULETA!";
+      this.isSpinning = false;
+      
+      // Solo restaurar área de spinner sin resetear textos
+      this.elements.spinnerArea.innerHTML = `
+        <h2 class="roulette-title">RULETA DE DESAFÍOS</h2>
+        <div class="default-message">listo para el siguiente</div>
+      `;
+    }, 2000);
 
-    console.log(`✅ Challenge selected: ${selectedChallenge.text}`);
+    // Efectos de sonido de victoria
+    this.playTone(880, 200);
+    setTimeout(() => this.playTone(1100, 300), 200);
+
+    console.log(
+      `🏆 Challenge completed! Recent challenges: ${this.recentChallenges.length}/3`
+    );
   }
 
   highlightWinningSlot(winningId) {
@@ -438,42 +393,6 @@ class FutureRoulette {
       const slotNumber = parseInt(
         slot.querySelector(".slot-number").textContent
       );
-      if (slotNumber === winningId) {
-        const slotRect = slot.getBoundingClientRect();
-        const containerRect = container.getBoundingClientRect();
-        const slotCenter =
-          slotRect.left + slotRect.width / 2 - containerRect.left;
-        const distance = Math.abs(slotCenter - centerX);
-
-        if (distance < minDistance) {
-          minDistance = distance;
-          closestSlot = slot;
-        }
-      }
-    });
-
-    if (closestSlot) {
-      closestSlot.classList.add("winning-slot");
-      // Remover highlight después de 3 segundos
-      setTimeout(() => {
-        closestSlot.classList.remove("winning-slot");
-      }, 3000);
-    }
-  }
-
-  addCompletionEffects() {
-    // Efecto de explosión de partículas
-    this.createBurstParticles(50);
-
-    // Efecto de brillo en el resultado
-    const challengePanel = document.querySelector(".current-challenge");
-    challengePanel.style.boxShadow = "0 0 40px rgba(255, 0, 64, 0.8)";
-
-    setTimeout(() => {
-      challengePanel.style.boxShadow = "var(--shadow-red)";
-    }, 1000);
-  }
-
   createParticles() {
     const particleCount = 20;
 
