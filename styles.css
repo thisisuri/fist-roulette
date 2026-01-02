@@ -267,6 +267,35 @@ header {
     pointer-events: none;
 }
 
+.roulette-slot.winning-slot {
+    background: rgba(255, 0, 64, 0.3) !important;
+    border: 3px solid var(--accent-red) !important;
+    box-shadow: 0 0 30px rgba(255, 0, 64, 0.8);
+    animation: winningPulse 0.5s ease-in-out 3;
+}
+
+.roulette-slot.winning-slot .slot-number {
+    color: var(--accent-red);
+    text-shadow: 0 0 20px var(--primary-red), 0 0 30px var(--primary-red);
+    animation: winningGlow 0.5s ease-in-out 3;
+}
+
+@keyframes winningPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+@keyframes winningGlow {
+    0%, 100% { 
+        color: var(--primary-red); 
+        text-shadow: var(--shadow-red);
+    }
+    50% { 
+        color: var(--accent-red); 
+        text-shadow: 0 0 20px var(--primary-red), 0 0 30px var(--primary-red);
+    }
+}
+
 @keyframes pulse {
     0%, 100% { 
         opacity: 1; 

@@ -14,8 +14,6 @@ class FutureRoulette {
       particles: document.getElementById("particles"),
     };
 
-    this.currentSlide = 0;
-
     this.init();
   }
 
@@ -121,16 +119,26 @@ class FutureRoulette {
   }
 
   centerWheel() {
-    const wheel = document.getElementById("rouletteWheel");
-    const container = this.elements.wheelTrack;
-    if (wheel && container) {
-      const containerWidth = container.offsetWidth;
-      const slotWidth = 120;
-      // Centrar en la segunda copia para permitir movimiento en ambas direcciones
-      const centerOffset = containerWidth / 2 - slotWidth / 2;
-      const initialPosition = this.challenges.length * slotWidth; // Empezar en la segunda copia
-      wheel.style.transform = `translateX(${centerOffset - initialPosition}px)`;
-    }
+    setTimeout(() => {
+      const wheel = document.getElementById("rouletteWheel");
+      const container = this.elements.wheelTrack;
+      if (wheel && container) {
+        const containerWidth = container.offsetWidth;
+        const slotWidth = 120;
+        // Centrar en la segunda copia para permitir movimiento en ambas direcciones
+        const centerOffset = containerWidth / 2 - slotWidth / 2;
+        const initialPosition = this.challenges.length * slotWidth; // Empezar en la segunda copia
+        wheel.style.transition = "none"; // Sin animación para el centrado inicial
+        wheel.style.transform = `translateX(${
+          centerOffset - initialPosition
+        }px)`;
+
+        // Restaurar transiciones después de un momento
+        setTimeout(() => {
+          wheel.style.transition = "transform 0.5s ease";
+        }, 100);
+      }
+    }, 50); // Pequeño delay para asegurar que el DOM esté listo
   }
 
   setupEventListeners() {
@@ -212,80 +220,6 @@ class FutureRoulette {
     return validChallenges[Math.floor(Math.random() * validChallenges.length)];
   }
 
-  selectItem(index) {
-    if (this.isSpinning) return;
-
-    this.currentSlide = index;
-
-    // Actualizar items activos del carrusel
-    document.querySelectorAll(".carousel-item").forEach((item, i) => {
-      item.classList.toggle("active", i === index);
-    });
-
-    // Actualizar dots
-    document.querySelectorAll(".dot").forEach((dot, i) => {
-      dot.classList.toggle("active", i === index);
-    });
-
-    // Centrar el carrusel en el elemento seleccionado
-    this.centerCarousel();
-
-    // Mostrar el texto del desafío correspondiente
-    if (this.challenges[index]) {
-      this.elements.challengeText.textContent = this.challenges[index].text;
-    }
-
-    this.updateNavigation();
-    this.updateCounter();
-    this.playTone(400 + index * 50, 150);
-  }
-
-  centerCarousel() {
-    const carousel = document.querySelector(".carousel-container");
-    const activeItem = document.querySelector(".carousel-item.active");
-
-    if (carousel && activeItem) {
-      const containerWidth = this.elements.slideTrack.offsetWidth;
-      const itemWidth = activeItem.offsetWidth;
-      const itemOffset = activeItem.offsetLeft;
-      const centerPosition = containerWidth / 2 - itemWidth / 2;
-      const translateX = centerPosition - itemOffset;
-
-      carousel.style.transform = `translateX(${translateX}px)`;
-    }
-  }
-
-  previousSlide() {
-    if (this.isSpinning || this.currentSlide === 0) return;
-    this.goToSlide(this.currentSlide - 1);
-  }
-
-  nextSlide() {
-    if (this.isSpinning || this.currentSlide === this.challenges.length - 1)
-      return;
-    this.goToSlide(this.currentSlide + 1);
-  }
-
-  updateSlideIndicator() {
-    // Ya no se necesita con el carrusel horizontal
-    // Los dots proporcionan la indicación visual necesaria
-  }
-
-  updateNavigation() {
-    this.elements.prevButton.disabled = this.currentSlide === 0;
-    this.elements.nextButton.disabled =
-      this.currentSlide === this.challenges.length - 1;
-  }
-
-  updateCounter() {
-    // optionCounter fue removido, ya no se actualiza
-
-    if (this.elements.currentNumber && this.challenges[this.currentSlide]) {
-      this.elements.currentNumber.textContent =
-        this.challenges[this.currentSlide].id;
-    }
-  }
-
   calculateTargetIndex(targetChallenge) {
     return this.challenges.findIndex((c) => c.id === targetChallenge.id);
   }
@@ -317,30 +251,41 @@ class FutureRoulette {
   async animateWheel(targetIndex) {
     return new Promise((resolve) => {
       const wheel = document.getElementById("rouletteWheel");
-      const slotWidth = 120; // Ancho de cada casilla
+      const container = this.elements.wheelTrack;
+      const slotWidth = 120;
       const totalSlots = this.challenges.length;
+      const containerWidth = container.offsetWidth;
+      const centerOffset = containerWidth / 2 - slotWidth / 2;
 
       // Calcular rotaciones adicionales para efecto visual
-      const extraRotations = 3 + Math.random() * 2; // 3-5 vueltas completas
-      const totalDistance =
-        extraRotations * totalSlots * slotWidth + targetIndex * slotWidth;
+      const extraRotations = 4 + Math.random() * 3; // 4-7 vueltas completas
+      const extraDistance = extraRotations * totalSlots * slotWidth;
 
-      // Aplicar animación CSS
-      wheel.style.transition = "transform 3s cubic-bezier(0.25, 0.1, 0.25, 1)";
-      wheel.style.transform = `translateX(-${totalDistance}px)`;
+      // Posición final: segunda copia + índice objetivo, centrado
+      const finalPosition = totalSlots * slotWidth + targetIndex * slotWidth;
+      const centeredFinalPosition = centerOffset - finalPosition;
+
+      // Posición durante la animación (con vueltas extra)
+      const animationEndPosition =
+        centerOffset - (finalPosition + extraDistance);
+
+      // Primera fase: animación larga con vueltas extra
+      wheel.style.transition = "transform 3.5s cubic-bezier(0.15, 0, 0.25, 1)";
+      wheel.style.transform = `translateX(${animationEndPosition}px)`;
 
       // Sonidos durante la rotación
       this.playSpinSounds();
 
       setTimeout(() => {
-        // Posicionar en la casilla final
-        wheel.style.transition = "transform 0.5s ease-out";
-        wheel.style.transform = `translateX(-${targetIndex * slotWidth}px)`;
+        // Segunda fase: posicionar en la casilla final centrada
+        wheel.style.transition =
+          "transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)";
+        wheel.style.transform = `translateX(${centeredFinalPosition}px)`;
 
         setTimeout(() => {
           resolve();
-        }, 500);
-      }, 3000);
+        }, 800);
+      }, 3500);
     });
   }
 
@@ -379,6 +324,9 @@ class FutureRoulette {
     // Actualizar desafío actual
     this.elements.challengeText.textContent = selectedChallenge.text;
 
+    // Marcar visualmente la casilla ganadora
+    this.highlightWinningSlot(selectedChallenge.id);
+
     // Actualizar historial reciente solo para lógica anti-repetición
     this.recentChallenges.unshift(selectedChallenge);
     if (this.recentChallenges.length > 3) {
@@ -395,6 +343,49 @@ class FutureRoulette {
     }
 
     console.log(`✅ Challenge selected: ${selectedChallenge.text}`);
+  }
+
+  highlightWinningSlot(winningId) {
+    // Limpiar highlight anterior
+    document.querySelectorAll(".roulette-slot").forEach((slot) => {
+      slot.classList.remove("winning-slot");
+    });
+
+    // Encontrar y marcar la casilla ganadora que está centrada
+    const wheel = document.getElementById("rouletteWheel");
+    const container = this.elements.wheelTrack;
+    const containerWidth = container.offsetWidth;
+    const centerX = containerWidth / 2;
+    const slots = wheel.querySelectorAll(".roulette-slot");
+
+    let closestSlot = null;
+    let minDistance = Infinity;
+
+    slots.forEach((slot) => {
+      const slotNumber = parseInt(
+        slot.querySelector(".slot-number").textContent
+      );
+      if (slotNumber === winningId) {
+        const slotRect = slot.getBoundingClientRect();
+        const containerRect = container.getBoundingClientRect();
+        const slotCenter =
+          slotRect.left + slotRect.width / 2 - containerRect.left;
+        const distance = Math.abs(slotCenter - centerX);
+
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestSlot = slot;
+        }
+      }
+    });
+
+    if (closestSlot) {
+      closestSlot.classList.add("winning-slot");
+      // Remover highlight después de 3 segundos
+      setTimeout(() => {
+        closestSlot.classList.remove("winning-slot");
+      }, 3000);
+    }
   }
 
   addCompletionEffects() {
