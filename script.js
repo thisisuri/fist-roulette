@@ -84,42 +84,51 @@ class FutureRoulette {
     wheel.className = "roulette-wheel";
     wheel.id = "rouletteWheel";
 
-    // Crear las casillas de la ruleta
-    this.challenges.forEach((challenge, index) => {
-      const slot = document.createElement("div");
-      slot.className = "roulette-slot";
-      slot.dataset.index = index;
-      slot.innerHTML = `
-        <div class="slot-number">${challenge.id}</div>
-      `;
-      wheel.appendChild(slot);
-    });
+    // Crear las casillas de la ruleta (duplicadas para loop infinito)
+    const totalCopies = 5; // Número de copias para loop suave
+    
+    for (let copy = 0; copy < totalCopies; copy++) {
+      this.challenges.forEach((challenge, index) => {
+        const slot = document.createElement("div");
+        slot.className = "roulette-slot";
+        slot.dataset.originalIndex = index;
+        slot.innerHTML = `
+          <div class="slot-number">${challenge.id}</div>
+        `;
+        wheel.appendChild(slot);
+      });
+    }
 
-    // Crear indicador de posición
+    // Crear indicador de posición (centrado)
     const indicator = document.createElement("div");
     indicator.className = "roulette-indicator";
     indicator.innerHTML = "▼";
-
+    
     this.elements.slideTrack.appendChild(indicator);
     this.elements.slideTrack.appendChild(wheel);
+
+    // Posicionar en el centro inicialmente
+    this.centerWheel();
 
     // Mostrar primer desafío
     if (this.challenges[0]) {
       this.elements.challengeText.textContent = this.challenges[0].text;
     }
 
-    console.log(
-      `🎰 Created roulette wheel with ${this.challenges.length} slots`
-    );
+    console.log(`🎰 Created infinite roulette wheel with ${this.challenges.length} slots`);
   }
 
-  setupTouchNavigation() {
-    let startX = 0;
-    let startY = 0;
-
-    this.elements.slideTrack.addEventListener("touchstart", (e) => {
-      startX = e.touches[0].clientX;
-      startY = e.touches[0].clientY;
+  centerWheel() {
+    const wheel = document.getElementById("rouletteWheel");
+    const container = this.elements.slideTrack;
+    if (wheel && container) {
+      const containerWidth = container.offsetWidth;
+      const slotWidth = 120;
+      // Centrar en la segunda copia para permitir movimiento en ambas direcciones
+      const centerOffset = (containerWidth / 2) - (slotWidth / 2);
+      const initialPosition = this.challenges.length * slotWidth; // Empezar en la segunda copia
+      wheel.style.transform = `translateX(${centerOffset - initialPosition}px)`;
+    }
     });
 
     this.elements.slideTrack.addEventListener("touchend", (e) => {
@@ -154,6 +163,13 @@ class FutureRoulette {
       if (e.code === "Space" && !this.isSpinning) {
         e.preventDefault();
         this.spin();
+      }
+    });
+
+    // Recentrar ruleta al redimensionar ventana
+    window.addEventListener("resize", () => {
+      if (!this.isSpinning) {
+        this.centerWheel();
       }
     });
   }
@@ -539,12 +555,8 @@ class FutureRoulette {
     this.elements.spinButton.querySelector(".button-text").textContent =
       "INICIAR RULETA";
 
-    // Resetear ruleta a la posición inicial
-    const wheel = document.getElementById("rouletteWheel");
-    if (wheel) {
-      wheel.style.transition = "transform 0.5s ease";
-      wheel.style.transform = "translateX(0px)";
-    }
+    // Resetear ruleta a la posición inicial centrada
+    this.centerWheel();
 
     console.log("🔄 Game reset");
   }

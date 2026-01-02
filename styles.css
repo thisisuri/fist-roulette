@@ -190,24 +190,27 @@ header {
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
 }
 
 .roulette-indicator {
     position: absolute;
-    top: 10px;
+    top: 15px;
     left: 50%;
     transform: translateX(-50%);
-    font-size: 2rem;
+    font-size: 2.5rem;
     color: var(--primary-red);
-    text-shadow: var(--shadow-red);
+    text-shadow: 0 0 20px var(--primary-red);
     z-index: 10;
     animation: pulse 2s infinite;
+    pointer-events: none;
 }
 
 .roulette-wheel {
     display: flex;
     align-items: center;
     height: 100px;
+    will-change: transform;
     transition: transform 3s cubic-bezier(0.25, 0.1, 0.25, 1);
 }
 
@@ -223,23 +226,28 @@ header {
     margin: 0 2px;
     flex-shrink: 0;
     position: relative;
+    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
 .roulette-slot::before {
     content: '';
     position: absolute;
-    top: -3px;
-    left: -3px;
-    right: -3px;
-    bottom: -3px;
-    background: linear-gradient(45deg, transparent, rgba(255, 0, 64, 0.1), transparent);
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, transparent, rgba(255, 0, 64, 0.2), transparent);
     border-radius: 12px;
     opacity: 0;
     transition: opacity 0.3s ease;
 }
 
+.roulette-slot:nth-child(even) {
+    background: rgba(255, 0, 64, 0.08);
+}
+
 .roulette-slot:nth-child(odd) {
-    background: rgba(255, 0, 64, 0.05);
+    background: var(--bg-dark-secondary);
 }
 
 .slot-number {
@@ -248,11 +256,21 @@ header {
     font-weight: 900;
     color: var(--primary-red);
     text-shadow: var(--shadow-red);
+    user-select: none;
+    pointer-events: none;
 }
 
 @keyframes pulse {
-    0%, 100% { opacity: 1; transform: translateX(-50%) scale(1); }
-    50% { opacity: 0.7; transform: translateX(-50%) scale(1.1); }
+    0%, 100% { 
+        opacity: 1; 
+        transform: translateX(-50%) scale(1); 
+        text-shadow: 0 0 20px var(--primary-red);
+    }
+    50% { 
+        opacity: 0.8; 
+        transform: translateX(-50%) scale(1.1); 
+        text-shadow: 0 0 30px var(--primary-red), 0 0 40px var(--primary-red);
+    }
 }
 
 .slide-indicator {
