@@ -2,17 +2,16 @@ class FutureRoulette {
   constructor() {
     this.challenges = [];
     this.recentChallenges = []; // Últimos 3 desafíos para evitar repetición
-    this.totalSpins = 0;
-    this.currentStreak = 0;
     this.isSpinning = false;
+
+    // Validar que todos los elementos necesarios existen
+    this.validateDOM();
 
     this.elements = {
       slideTrack: document.getElementById("slideTrack"),
       slideDots: document.getElementById("slideDots"),
       spinButton: document.getElementById("spinButton"),
       challengeText: document.getElementById("challengeText"),
-      totalSpins: document.getElementById("totalSpins"),
-      currentStreak: document.getElementById("currentStreak"),
       particles: document.getElementById("particles"),
       optionCounter: document.getElementById("optionCounter"),
       currentNumber: document.getElementById("currentNumber"),
@@ -25,13 +24,38 @@ class FutureRoulette {
     this.init();
   }
 
+  validateDOM() {
+    const requiredElements = [
+      "slideTrack",
+      "slideDots",
+      "spinButton",
+      "challengeText",
+
+      "particles",
+      "optionCounter",
+      "currentNumber",
+      "prevButton",
+      "nextButton",
+    ];
+
+    const missingElements = requiredElements.filter(
+      (id) => !document.getElementById(id)
+    );
+
+    if (missingElements.length > 0) {
+      console.error("❌ Missing required DOM elements:", missingElements);
+      throw new Error(
+        `Faltan elementos necesarios en el HTML: ${missingElements.join(", ")}`
+      );
+    }
+  }
+
   async init() {
     try {
       await this.loadChallenges();
       this.createRoulette();
       this.setupEventListeners();
       this.createParticles();
-      this.updateStats();
       this.updateCounter(); // Inicializar contador
       console.log("🎮 Fist Roulette 2026 initialized successfully!");
     } catch (error) {
@@ -220,11 +244,16 @@ class FutureRoulette {
   }
 
   updateCounter() {
-    this.elements.optionCounter.textContent = `${this.currentSlide + 1} / ${
-      this.challenges.length
-    }`;
-    this.elements.currentNumber.textContent =
-      this.challenges[this.currentSlide].id;
+    if (this.elements.optionCounter) {
+      this.elements.optionCounter.textContent = `${this.currentSlide + 1} / ${
+        this.challenges.length
+      }`;
+    }
+
+    if (this.elements.currentNumber && this.challenges[this.currentSlide]) {
+      this.elements.currentNumber.textContent =
+        this.challenges[this.currentSlide].id;
+    }
   }
 
   calculateTargetSlide(targetChallenge) {
@@ -324,11 +353,6 @@ class FutureRoulette {
       this.recentChallenges = this.recentChallenges.slice(0, 3);
     }
 
-    // Actualizar estadísticas
-    this.totalSpins++;
-    this.currentStreak++;
-    this.updateStats();
-
     // Efectos visuales de completación
     this.addCompletionEffects();
 
@@ -340,28 +364,6 @@ class FutureRoulette {
     slideshowContainer.style.boxShadow = "var(--shadow-red)";
 
     console.log(`✅ Challenge selected: ${selectedChallenge.text}`);
-    console.log(
-      `📊 Total spins: ${this.totalSpins}, Recent challenges: ${this.recentChallenges.length}`
-    );
-  }
-
-  updateStats() {
-    this.elements.totalSpins.textContent = this.totalSpins;
-    this.elements.currentStreak.textContent = this.currentStreak;
-
-    // Animación de números
-    this.animateNumber(this.elements.totalSpins);
-    this.animateNumber(this.elements.currentStreak);
-  }
-
-  animateNumber(element) {
-    element.style.transform = "scale(1.2)";
-    element.style.color = "var(--neon-red)";
-
-    setTimeout(() => {
-      element.style.transform = "scale(1)";
-      element.style.color = "var(--primary-red)";
-    }, 200);
   }
 
   addCompletionEffects() {
@@ -470,10 +472,7 @@ class FutureRoulette {
   // Método para reiniciar el juego
   reset() {
     this.recentChallenges = [];
-    this.totalSpins = 0;
-    this.currentStreak = 0;
     this.currentSlide = 0;
-    this.updateStats();
     this.elements.challengeText.textContent =
       "¡Haz girar la ruleta para comenzar!";
     this.elements.spinButton.querySelector(".button-text").textContent =
@@ -521,8 +520,6 @@ class FutureRoulette {
   // Método para obtener estadísticas
   getStats() {
     return {
-      totalSpins: this.totalSpins,
-      currentStreak: this.currentStreak,
       recentChallenges: this.recentChallenges,
       availableChallenges: this.getValidChallenges().length,
       totalChallenges: this.challenges.length,
@@ -532,24 +529,54 @@ class FutureRoulette {
 
 // Inicializar el juego cuando se cargue la página
 document.addEventListener("DOMContentLoaded", () => {
-  // Crear instancia global de la ruleta
-  window.futureRoulette = new FutureRoulette();
+  try {
+    // Crear instancia global de la ruleta
+    window.futureRoulette = new FutureRoulette();
+
+    console.log("✅ Game initialized successfully");
+  } catch (error) {
+    console.error("💥 Failed to initialize game:", error);
+
+    // Mostrar error en la página
+    const errorContainer = document.createElement("div");
+    errorContainer.style.cssText = `
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: #990026;
+      color: white;
+      padding: 20px;
+      border-radius: 10px;
+      text-align: center;
+      z-index: 9999;
+      box-shadow: 0 0 20px rgba(153, 0, 38, 0.8);
+    `;
+    errorContainer.innerHTML = `
+      <h3>Error al cargar el juego</h3>
+      <p>${error.message}</p>
+      <p><small>Por favor, recarga la página.</small></p>
+    `;
+    document.body.appendChild(errorContainer);
+  }
 
   // Exponer métodos útiles en la consola para debugging
-  window.resetGame = () => window.futureRoulette.reset();
-  window.getGameStats = () => console.table(window.futureRoulette.getStats());
+  if (window.futureRoulette) {
+    window.resetGame = () => window.futureRoulette.reset();
+    window.getGameStats = () => console.table(window.futureRoulette.getStats());
 
-  // Easter egg: comando de consola para modo debug
-  window.debugMode = () => {
-    console.log("🎮 Debug mode activated!");
-    console.log("Available commands: resetGame(), getGameStats()");
-    console.table(window.futureRoulette.getStats());
-  };
+    // Easter egg: comando de consola para modo debug
+    window.debugMode = () => {
+      console.log("🎮 Debug mode activated!");
+      console.log("Available commands: resetGame(), getGameStats()");
+      console.table(window.futureRoulette.getStats());
+    };
+  }
 
   // Mensaje de bienvenida en consola
   console.log(`
     🚀 ================================
-    🎮 FUTURE ROULETTE 2025 
+    🎮 FIST ROULETTE 2026 
     🚀 ================================
     
     🎯 Commands:
