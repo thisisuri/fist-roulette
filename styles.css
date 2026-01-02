@@ -172,53 +172,76 @@ header {
 
 .slideshow-viewer {
     position: relative;
-    height: 200px;
+    height: 120px;
     overflow: hidden;
     border-radius: 15px;
     background: rgba(0, 0, 0, 0.3);
     margin-bottom: 25px;
+    border: 2px solid rgba(255, 0, 64, 0.2);
 }
 
 .slide-track {
-    display: flex;
+    position: relative;
     height: 100%;
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    padding: 10px 0;
 }
 
-.slide {
-    min-width: 100%;
+.carousel-container {
+    display: flex;
+    align-items: center;
+    height: 100%;
+    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    gap: 15px;
+}
+
+.carousel-item {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 40px;
+    min-width: 80px;
+    height: 80px;
     background: var(--bg-dark-secondary);
     border: 2px solid rgba(255, 0, 64, 0.2);
-    border-radius: 15px;
-    margin: 0 5px;
+    border-radius: 12px;
+    padding: 8px;
     transition: all 0.3s ease;
+    cursor: pointer;
+    flex-shrink: 0;
 }
 
-.slide.active {
+.carousel-item:hover {
+    border-color: var(--primary-red);
+    transform: scale(1.05);
+}
+
+.carousel-item.active {
     background: rgba(255, 0, 64, 0.15);
     border: 2px solid var(--primary-red);
-    box-shadow: 0 0 30px rgba(255, 0, 64, 0.3);
+    box-shadow: 0 0 20px rgba(255, 0, 64, 0.4);
+    transform: scale(1.1);
 }
 
-.slide-number {
+.carousel-number {
     font-family: 'Orbitron', monospace;
-    font-size: 5rem;
+    font-size: 1.8rem;
     font-weight: 900;
     color: var(--primary-red);
     text-shadow: var(--shadow-red);
-    text-align: center;
-    transition: all 0.3s ease;
+    line-height: 1;
 }
 
-.slide.active .slide-number {
+.carousel-item.active .carousel-number {
     color: var(--accent-red);
-    text-shadow: 0 0 30px var(--primary-red), 0 0 40px var(--primary-red);
-    transform: scale(1.1);
+    text-shadow: 0 0 15px var(--primary-red);
+}
+
+.carousel-label {
+    font-size: 0.7rem;
+    color: var(--text-gray);
+    font-weight: 500;
+    margin-top: 2px;
+    text-align: center;
 }
 
 .slide-indicator {

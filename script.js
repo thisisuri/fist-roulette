@@ -85,29 +85,76 @@ class FutureRoulette {
   }
 
   createRoulette() {
-    // Crear slides
+    // Crear carrusel horizontal
     this.elements.slideTrack.innerHTML = "";
     this.elements.slideDots.innerHTML = "";
 
-    this.challenges.forEach((challenge, index) => {
-      // Crear slide solo con número
-      const slide = document.createElement("div");
-      slide.className = index === 0 ? "slide active" : "slide";
-      slide.innerHTML = `
-        <div class="slide-number">${challenge.id}</div>
-      `;
-      this.elements.slideTrack.appendChild(slide);
+    // Crear contenedor de carrusel
+    const carousel = document.createElement("div");
+    carousel.className = "carousel-container";
 
-      // Crear dot
+    this.challenges.forEach((challenge, index) => {
+      // Crear item del carrusel
+      const item = document.createElement("div");
+      item.className = index === 0 ? "carousel-item active" : "carousel-item";
+      item.dataset.index = index;
+      item.innerHTML = `
+        <div class="carousel-number">${challenge.id}</div>
+        <div class="carousel-label">Desafío</div>
+      `;
+
+      // Agregar evento de click
+      item.addEventListener("click", () => this.selectItem(index));
+
+      carousel.appendChild(item);
+
+      // Crear dot indicador
       const dot = document.createElement("div");
       dot.className = index === 0 ? "dot active" : "dot";
-      dot.addEventListener("click", () => this.goToSlide(index));
+      dot.addEventListener("click", () => this.selectItem(index));
       this.elements.slideDots.appendChild(dot);
     });
 
-    this.updateSlideIndicator();
+    this.elements.slideTrack.appendChild(carousel);
+    this.centerCarousel();
     this.updateNavigation();
-    console.log(`🎯 Created slideshow with ${this.challenges.length} slides`);
+
+    // Agregar soporte para navegación táctil
+    this.setupTouchNavigation();
+
+    console.log(
+      `🎯 Created horizontal carousel with ${this.challenges.length} items`
+    );
+  }
+
+  setupTouchNavigation() {
+    let startX = 0;
+    let startY = 0;
+
+    this.elements.slideTrack.addEventListener("touchstart", (e) => {
+      startX = e.touches[0].clientX;
+      startY = e.touches[0].clientY;
+    });
+
+    this.elements.slideTrack.addEventListener("touchend", (e) => {
+      if (this.isSpinning) return;
+
+      const endX = e.changedTouches[0].clientX;
+      const endY = e.changedTouches[0].clientY;
+      const diffX = startX - endX;
+      const diffY = startY - endY;
+
+      // Solo procesar si el movimiento horizontal es mayor que el vertical
+      if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 50) {
+        if (diffX > 0) {
+          // Swipe izquierda - ir al siguiente
+          this.nextSlide();
+        } else {
+          // Swipe derecha - ir al anterior
+          this.previousSlide();
+        }
+      }
+    });
   }
 
   setupEventListeners() {
@@ -190,16 +237,14 @@ class FutureRoulette {
     return validChallenges[Math.floor(Math.random() * validChallenges.length)];
   }
 
-  goToSlide(index) {
+  selectItem(index) {
     if (this.isSpinning) return;
 
     this.currentSlide = index;
-    const translateX = -index * 100;
-    this.elements.slideTrack.style.transform = `translateX(${translateX}%)`;
 
-    // Actualizar slides activos
-    document.querySelectorAll(".slide").forEach((slide, i) => {
-      slide.classList.toggle("active", i === index);
+    // Actualizar items activos del carrusel
+    document.querySelectorAll(".carousel-item").forEach((item, i) => {
+      item.classList.toggle("active", i === index);
     });
 
     // Actualizar dots
@@ -207,16 +252,32 @@ class FutureRoulette {
       dot.classList.toggle("active", i === index);
     });
 
-    // Mostrar el texto del desafío correspondiente al número seleccionado
+    // Centrar el carrusel en el elemento seleccionado
+    this.centerCarousel();
+
+    // Mostrar el texto del desafío correspondiente
     if (this.challenges[index]) {
       this.elements.challengeText.textContent = this.challenges[index].text;
     }
 
-    this.updateSlideIndicator();
     this.updateNavigation();
     this.updateCounter();
-
     this.playTone(400 + index * 50, 150);
+  }
+
+  centerCarousel() {
+    const carousel = document.querySelector(".carousel-container");
+    const activeItem = document.querySelector(".carousel-item.active");
+
+    if (carousel && activeItem) {
+      const containerWidth = this.elements.slideTrack.offsetWidth;
+      const itemWidth = activeItem.offsetWidth;
+      const itemOffset = activeItem.offsetLeft;
+      const centerPosition = containerWidth / 2 - itemWidth / 2;
+      const translateX = centerPosition - itemOffset;
+
+      carousel.style.transform = `translateX(${translateX}px)`;
+    }
   }
 
   previousSlide() {
@@ -231,12 +292,8 @@ class FutureRoulette {
   }
 
   updateSlideIndicator() {
-    const indicator = document.querySelector(".slide-indicator::after");
-    const percentage = (this.currentSlide / (this.challenges.length - 1)) * 80;
-    document.documentElement.style.setProperty(
-      "--indicator-position",
-      `${percentage}%`
-    );
+    // Ya no se necesita con el carrusel horizontal
+    // Los dots proporcionan la indicación visual necesaria
   }
 
   updateNavigation() {
@@ -288,23 +345,23 @@ class FutureRoulette {
 
   async animateSlideshow(targetSlide) {
     return new Promise((resolve) => {
-      // Crear animación de slides rápidos
+      // Crear animación de carrusel rápido
       const steps = 15 + Math.floor(Math.random() * 10); // 15-25 pasos
       const stepDuration = 150; // ms por paso
       let currentStep = 0;
 
-      const slideAnimation = setInterval(() => {
-        // Ir a un slide aleatorio durante la animación
+      const carouselAnimation = setInterval(() => {
+        // Ir a un item aleatorio durante la animación
         const randomSlide = Math.floor(Math.random() * this.challenges.length);
-        this.goToSlide(randomSlide);
+        this.selectItem(randomSlide);
 
         currentStep++;
 
         if (currentStep >= steps) {
-          clearInterval(slideAnimation);
-          // Ir al slide objetivo final
+          clearInterval(carouselAnimation);
+          // Ir al item objetivo final
           setTimeout(() => {
-            this.goToSlide(targetSlide);
+            this.selectItem(targetSlide);
             resolve();
           }, stepDuration);
         }
@@ -476,8 +533,8 @@ class FutureRoulette {
     this.elements.spinButton.querySelector(".button-text").textContent =
       "INICIAR RULETA";
 
-    // Resetear slideshow a la primera posición
-    this.goToSlide(0);
+    // Resetear carrusel a la primera posición
+    this.selectItem(0);
 
     console.log("🔄 Game reset");
   }
