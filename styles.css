@@ -144,7 +144,7 @@ header {
 
 .slideshow-header {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     margin-bottom: 25px;
     padding-bottom: 15px;
@@ -191,31 +191,34 @@ header {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 30px;
+    padding: 40px;
     background: var(--bg-dark-secondary);
-    border: 1px solid rgba(255, 0, 64, 0.2);
+    border: 2px solid rgba(255, 0, 64, 0.2);
+    border-radius: 15px;
+    margin: 0 5px;
+    transition: all 0.3s ease;
 }
 
 .slide.active {
-    background: rgba(255, 0, 64, 0.1);
-    border: 1px solid var(--primary-red);
+    background: rgba(255, 0, 64, 0.15);
+    border: 2px solid var(--primary-red);
+    box-shadow: 0 0 30px rgba(255, 0, 64, 0.3);
 }
 
 .slide-number {
     font-family: 'Orbitron', monospace;
-    font-size: 3rem;
+    font-size: 5rem;
     font-weight: 900;
     color: var(--primary-red);
     text-shadow: var(--shadow-red);
-    margin-bottom: 10px;
+    text-align: center;
+    transition: all 0.3s ease;
 }
 
-.slide-challenge {
-    font-size: 1.1rem;
-    color: var(--text-gray);
-    text-align: center;
-    line-height: 1.4;
-    font-weight: 500;
+.slide.active .slide-number {
+    color: var(--accent-red);
+    text-shadow: 0 0 30px var(--primary-red), 0 0 40px var(--primary-red);
+    transform: scale(1.1);
 }
 
 .slide-indicator {

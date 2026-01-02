@@ -13,7 +13,6 @@ class FutureRoulette {
       spinButton: document.getElementById("spinButton"),
       challengeText: document.getElementById("challengeText"),
       particles: document.getElementById("particles"),
-      optionCounter: document.getElementById("optionCounter"),
       currentNumber: document.getElementById("currentNumber"),
       prevButton: document.getElementById("prevButton"),
       nextButton: document.getElementById("nextButton"),
@@ -30,9 +29,7 @@ class FutureRoulette {
       "slideDots",
       "spinButton",
       "challengeText",
-
       "particles",
-      "optionCounter",
       "currentNumber",
       "prevButton",
       "nextButton",
@@ -56,7 +53,11 @@ class FutureRoulette {
       this.createRoulette();
       this.setupEventListeners();
       this.createParticles();
-      this.updateCounter(); // Inicializar contador
+      this.updateCounter();
+      // Mostrar el texto del primer desafío
+      if (this.challenges[0]) {
+        this.elements.challengeText.textContent = this.challenges[0].text;
+      }
       console.log("🎮 Fist Roulette 2026 initialized successfully!");
     } catch (error) {
       console.error("❌ Error initializing roulette:", error);
@@ -89,17 +90,15 @@ class FutureRoulette {
     this.elements.slideDots.innerHTML = "";
 
     this.challenges.forEach((challenge, index) => {
-      // Crear slide
+      // Crear slide solo con número
       const slide = document.createElement("div");
       slide.className = index === 0 ? "slide active" : "slide";
       slide.innerHTML = `
         <div class="slide-number">${challenge.id}</div>
-        <div class="slide-challenge">${challenge.text}</div>
       `;
-
       this.elements.slideTrack.appendChild(slide);
 
-      // Crear dot de navegación
+      // Crear dot
       const dot = document.createElement("div");
       dot.className = index === 0 ? "dot active" : "dot";
       dot.addEventListener("click", () => this.goToSlide(index));
@@ -208,24 +207,27 @@ class FutureRoulette {
       dot.classList.toggle("active", i === index);
     });
 
+    // Mostrar el texto del desafío correspondiente al número seleccionado
+    if (this.challenges[index]) {
+      this.elements.challengeText.textContent = this.challenges[index].text;
+    }
+
     this.updateSlideIndicator();
     this.updateNavigation();
     this.updateCounter();
-  }
 
-  nextSlide() {
-    if (this.isSpinning) return;
-    const nextIndex = (this.currentSlide + 1) % this.challenges.length;
-    this.goToSlide(nextIndex);
+    this.playTone(400 + index * 50, 150);
   }
 
   previousSlide() {
-    if (this.isSpinning) return;
-    const prevIndex =
-      this.currentSlide === 0
-        ? this.challenges.length - 1
-        : this.currentSlide - 1;
-    this.goToSlide(prevIndex);
+    if (this.isSpinning || this.currentSlide === 0) return;
+    this.goToSlide(this.currentSlide - 1);
+  }
+
+  nextSlide() {
+    if (this.isSpinning || this.currentSlide === this.challenges.length - 1)
+      return;
+    this.goToSlide(this.currentSlide + 1);
   }
 
   updateSlideIndicator() {
@@ -244,11 +246,7 @@ class FutureRoulette {
   }
 
   updateCounter() {
-    if (this.elements.optionCounter) {
-      this.elements.optionCounter.textContent = `${this.currentSlide + 1} / ${
-        this.challenges.length
-      }`;
-    }
+    // optionCounter fue removido, ya no se actualiza
 
     if (this.elements.currentNumber && this.challenges[this.currentSlide]) {
       this.elements.currentNumber.textContent =
