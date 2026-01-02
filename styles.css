@@ -129,6 +129,8 @@ header {
     flex-direction: column;
     align-items: center;
     gap: 30px;
+    max-width: 700px;
+    width: 100%;
 }
 
 /* Slideshow Container */
@@ -147,14 +149,17 @@ header {
     position: relative;
     height: 150px;
     overflow: hidden;
-    border-radius: 15px;
-    background: rgba(0, 0, 0, 0.4);
-    border: 3px solid rgba(255, 0, 64, 0.3);
+    border-radius: 20px;
+    background: var(--gradient-dark);
+    border: 2px solid var(--primary-red);
+    box-shadow: var(--shadow-red);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     margin-bottom: 30px;
+    padding: 30px;
+    width: 100%;
 }
 
 .default-message {
@@ -546,6 +551,8 @@ header {
     display: flex;
     flex-direction: column;
     gap: 30px;
+    max-width: 700px;
+    width: 100%;
 }
 
 .current-challenge {
@@ -556,6 +563,7 @@ header {
     box-shadow: var(--shadow-red);
     position: relative;
     overflow: hidden;
+    width: 100%;
 }
 
 .challenge-label {
@@ -601,6 +609,9 @@ header {
     overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
     border: 1px solid rgba(255, 255, 255, 0.1);
+    background-size: cover;
+    background-position: center;
+    display: inline-block;
 }
 
 .challenge-lang .challenge-text {
