@@ -28,37 +28,19 @@
 
       <main class="game-area">
         <div class="roulette-container">
-          <div class="slideshow-container">
-            <div class="slideshow-header">
-              <div class="option-counter" id="optionCounter">1 / 12</div>
-              <div class="slideshow-title">
-                DESAFÍO #<span id="currentNumber">1</span>
-              </div>
-            </div>
+          <div class="roulette-wheel-container">
+            <h2 class="roulette-title">RULETA DE DESAFÍOS</h2>
 
-            <div class="slideshow-viewer">
-              <div class="slide-track" id="slideTrack">
-                <!-- Los slides se generarán dinámicamente -->
+            <div class="wheel-viewer">
+              <div class="wheel-track" id="wheelTrack">
+                <!-- Las casillas se generarán dinámicamente -->
               </div>
-              <div class="slide-indicator"></div>
-            </div>
-
-            <div class="slideshow-navigation">
-              <button class="nav-button prev" id="prevButton" disabled>
-                <span>‹</span>
-              </button>
-              <div class="slide-dots" id="slideDots">
-                <!-- Los dots se generarán dinámicamente -->
-              </div>
-              <button class="nav-button next" id="nextButton">
-                <span>›</span>
-              </button>
             </div>
           </div>
 
           <div class="control-panel">
             <button class="spin-button" id="spinButton">
-              <span class="button-text">INICIAR RULETA</span>
+              <span class="button-text">GIRAR RULETA</span>
               <div class="button-glow"></div>
             </button>
           </div>

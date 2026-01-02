@@ -8,7 +8,7 @@ class FutureRoulette {
     this.validateDOM();
 
     this.elements = {
-      slideTrack: document.getElementById("slideTrack"),
+      wheelTrack: document.getElementById("wheelTrack"),
       spinButton: document.getElementById("spinButton"),
       challengeText: document.getElementById("challengeText"),
       particles: document.getElementById("particles"),
@@ -21,7 +21,7 @@ class FutureRoulette {
 
   validateDOM() {
     const requiredElements = [
-      "slideTrack",
+      "wheelTrack",
       "spinButton",
       "challengeText",
       "particles",
@@ -77,7 +77,7 @@ class FutureRoulette {
 
   createWheel() {
     // Crear ruleta horizontal con casillas
-    this.elements.slideTrack.innerHTML = "";
+    this.elements.wheelTrack.innerHTML = "";
 
     // Crear contenedor de la ruleta
     const wheel = document.createElement("div");
@@ -104,8 +104,8 @@ class FutureRoulette {
     indicator.className = "roulette-indicator";
     indicator.innerHTML = "▼";
     
-    this.elements.slideTrack.appendChild(indicator);
-    this.elements.slideTrack.appendChild(wheel);
+    this.elements.wheelTrack.appendChild(indicator);
+    this.elements.wheelTrack.appendChild(wheel);
 
     // Posicionar en el centro inicialmente
     this.centerWheel();
@@ -120,7 +120,7 @@ class FutureRoulette {
 
   centerWheel() {
     const wheel = document.getElementById("rouletteWheel");
-    const container = this.elements.slideTrack;
+    const container = this.elements.wheelTrack;
     if (wheel && container) {
       const containerWidth = container.offsetWidth;
       const slotWidth = 120;
@@ -367,39 +367,11 @@ class FutureRoulette {
     // Efecto de partículas adicionales
     this.createBurstParticles();
 
-    // Efecto de brillo en el slideshow
-    const slideshowContainer = document.querySelector(".slideshow-container");
-    slideshowContainer.style.boxShadow = "0 0 50px rgba(255, 0, 64, 0.8)";
-  }
-
-  async animateWheel(targetIndex) {
-    return new Promise((resolve) => {
-      const wheel = document.getElementById("rouletteWheel");
-      const slotWidth = 120; // Ancho de cada casilla
-      const totalSlots = this.challenges.length;
-
-      // Calcular rotaciones adicionales para efecto visual
-      const extraRotations = 3 + Math.random() * 2; // 3-5 vueltas completas
-      const totalDistance =
-        extraRotations * totalSlots * slotWidth + targetIndex * slotWidth;
-
-      // Aplicar animación CSS
-      wheel.style.transition = "transform 3s cubic-bezier(0.25, 0.1, 0.25, 1)";
-      wheel.style.transform = `translateX(-${totalDistance}px)`;
-
-      // Sonidos durante la rotación
-      this.playSpinSounds();
-
-      setTimeout(() => {
-        // Posicionar en la casilla final
-        wheel.style.transition = "transform 0.5s ease-out";
-        wheel.style.transform = `translateX(-${targetIndex * slotWidth}px)`;
-
-        setTimeout(() => {
-          resolve();
-        }, 500);
-      }, 3000);
-    });
+    // Efecto de brillo en el contenedor de la ruleta
+    const wheelContainer = document.querySelector(".roulette-wheel-container");
+    if (wheelContainer) {
+      wheelContainer.style.boxShadow = "0 0 50px rgba(255, 0, 64, 0.8)";
+    }
   }
 
   playSpinSounds() {
@@ -436,9 +408,9 @@ class FutureRoulette {
     this.addCompletionEffects();
 
     // Limpiar efectos visuales
-    const slideshowContainer = document.querySelector(".slideshow-container");
-    if (slideshowContainer) {
-      slideshowContainer.style.boxShadow = "var(--shadow-red)";
+    const wheelContainer = document.querySelector(".roulette-wheel-container");
+    if (wheelContainer) {
+      wheelContainer.style.boxShadow = "var(--shadow-red)";
     }
 
     console.log(`✅ Challenge selected: ${selectedChallenge.text}`);
